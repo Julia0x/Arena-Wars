@@ -77,7 +77,7 @@ public class CTFAdminCommand implements CommandExecutor, TabCompleter {
         }
         
         if (args.length < 2) {
-            plugin.getMessageUtil().sendRawMessage((Player) sender, "&cUsage: /ctfadmin setup <arena>");
+            plugin.getMessageUtil().sendErrorMessage((Player) sender, "Usage: /ctfadmin setup <arena>");
             return true;
         }
         
