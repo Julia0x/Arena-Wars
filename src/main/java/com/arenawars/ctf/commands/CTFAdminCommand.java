@@ -7,6 +7,7 @@ package com.arenawars.ctf.commands;
 
 import com.arenawars.ctf.ArenaWarsCTF;
 import com.arenawars.ctf.arena.Arena;
+import com.arenawars.ctf.managers.ColorManager;
 import com.arenawars.ctf.utils.MessageUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
