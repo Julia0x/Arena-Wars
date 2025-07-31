@@ -1,0 +1,79 @@
+# ArenaWarsCTF Configuration
+# © 2025 ArenaWars Development Team - All Rights Reserved
+# Version: 1.0.0
+# This configuration is automatically managed for updates
+
+config-version: 1.0.0
+
+# General Settings
+settings:
+  # Maximum players per arena (4 per team = 8 total)
+  max-players-per-arena: 8
+  min-players-to-start: 4
+  
+  # Game Duration (in seconds)
+  game-duration: 900  # 15 minutes
+  
+  # Respawn Settings
+  respawn-delay: 5  # seconds
+  spectator-time: 5  # seconds in spectator mode before respawn
+  
+  # Flag Settings
+  flag-return-delay: 30  # seconds before flag auto-returns
+  captures-to-win: 3     # number of captures needed to win
+  
+  # Spawn Protection
+  spawn-protection-time: 5  # seconds of spawn protection
+  spawn-protection-remove-on-hit: true  # remove protection when player hits someone
+  
+  # Arena Settings
+  auto-cleanup-after-game: true
+  teleport-delay: 3  # seconds before teleporting to arena
+  
+  # Scoreboard Settings
+  scoreboard-update-interval: 2  # seconds
+  
+  # Effects and Sounds
+  enable-particles: true
+  enable-sounds: true
+  enable-titles: true
+
+# XP and Level System
+xp-system:
+  enabled: true
+  kill-xp: 10
+  capture-xp: 50
+  return-xp: 25
+  win-xp: 100
+  mvp-xp: 150
+  participation-xp: 20
+  
+  # Level calculation
+  base-xp: 100          # XP needed for level 2
+  xp-multiplier: 1.5    # Multiplier per level
+  
+  # Level rewards
+  coins-per-level: 10   # Coins awarded per level up
+
+# Database Settings (File-based)
+storage:
+  type: "file"  # Currently only file-based storage
+  save-interval: 300  # seconds (5 minutes)
+  backup-on-start: true
+
+# Permission Settings
+permissions:
+  use-permission-system: true
+  default-permission: "arenawars.ctf.use"
+
+# Update Settings
+updates:
+  check-for-updates: true
+  auto-update-config: true
+  preserve-custom-settings: true
+
+# Debug Settings
+debug:
+  enabled: false
+  log-game-events: false
+  log-player-actions: false

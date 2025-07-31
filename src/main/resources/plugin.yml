@@ -1,0 +1,44 @@
+name: ArenaWarsCTF
+version: 1.0.0
+main: com.arenawars.ctf.ArenaWarsCTF
+api-version: 1.21
+author: ArenaWars Development Team
+description: Professional CTF Plugin with Multi-Arena System
+website: https://arenawars.com
+copyright: "© 2025 ArenaWars Development Team. All rights reserved."
+
+depend: [WorldGuard]
+
+commands:
+  ctf:
+    description: Main CTF command
+    usage: /ctf <subcommand>
+    permission: arenawars.ctf.use
+    aliases: [arenactf, awctf]
+  
+  ctfadmin:
+    description: CTF Admin commands
+    usage: /ctfadmin <subcommand>
+    permission: arenawars.ctf.admin
+    aliases: [ctfa, awadmin]
+
+permissions:
+  arenawars.ctf.*:
+    description: All CTF permissions
+    default: op
+    children:
+      arenawars.ctf.use: true
+      arenawars.ctf.admin: true
+      arenawars.ctf.setup: true
+  
+  arenawars.ctf.use:
+    description: Basic CTF usage
+    default: true
+  
+  arenawars.ctf.admin:
+    description: CTF administration
+    default: op
+  
+  arenawars.ctf.setup:
+    description: Arena setup permissions
+    default: op

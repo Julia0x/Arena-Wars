@@ -1,0 +1,105 @@
+# ArenaWarsCTF Messages
+# © 2025 ArenaWars Development Team - All Rights Reserved
+# Version: 1.0.0
+
+prefix: "&6[&eArenaWars&6] &7"
+
+# General Messages
+general:
+  no-permission: "&cYou don't have permission to use this command!"
+  player-only: "&cThis command can only be used by players!"
+  reload-success: "&aConfiguration reloaded successfully!"
+  unknown-command: "&cUnknown command! Use &e/ctf help &cfor help."
+
+# Game Messages
+game:
+  joined-queue: "&aYou joined the queue for arena &e{arena}&a!"
+  left-queue: "&cYou left the queue for arena &e{arena}&c!"
+  game-starting: "&6Game starting in &e{seconds} &6seconds!"
+  game-started: "&aThe game has started! Capture the enemy flag!"
+  game-ended: "&6The game has ended!"
+  
+  # Team Messages
+  team-assigned: "&aYou have been assigned to &e{team} &ateam!"
+  team-red: "&cRed Team"
+  team-blue: "&9Blue Team"
+  
+  # Flag Messages
+  flag-taken: "&e{player} &6has taken the &{color}{team} &6flag!"
+  flag-dropped: "&e{player} &6has dropped the &{color}{team} &6flag!"
+  flag-returned: "&6The &{color}{team} &6flag has been returned!"
+  flag-captured: "&e{player} &6has captured the &{color}{team} &6flag! &a({score}/3)"
+  
+  # Win Messages
+  team-won: "&6{team} Team has won the game!"
+  victory-title: "&6&lVICTORY!"
+  defeat-title: "&c&lDEFEAT!"
+  
+  # Respawn Messages
+  death-message: "&cYou died! Spectating for &e{seconds} &cseconds..."
+  respawning: "&aRespawning in &e{seconds} &aseconds..."
+  respawned: "&aYou have respawned with spawn protection!"
+  spawn-protection-lost: "&cSpawn protection removed!"
+
+# XP and Level Messages
+xp:
+  gained: "&a+{amount} XP &7({reason})"
+  level-up: "&a&l[LEVEL UP] &eYou reached level &6{level}&e!"
+  level-reward: "&eReward: &6{coins} coins"
+  mvp-bonus: "&6&l[MVP] &eYou earned &6{xp} &ebonus XP!"
+
+# MVP Messages  
+mvp:
+  announcement: "&6&l[MVP] {player} &6was the Most Valuable Player!"
+  stats-header: "&6═══ MOST VALUABLE PLAYER ═══"
+  stats-player: "&e{player} &7({team})"
+  stats-performance: "&7Kills: &a{kills} &7Deaths: &c{deaths}"
+  stats-objectives: "&7Captures: &e{captures} &7Returns: &b{returns}"
+  stats-bonus: "&eBonus: &6+{xp} XP"
+
+# Arena Messages
+arena:
+  not-found: "&cArena &e{arena} &cnot found!"
+  already-exists: "&cArena &e{arena} &calready exists!"
+  created: "&aArena &e{arena} &acreated successfully!"
+  deleted: "&cArena &e{arena} &cdeleted!"
+  setup-mode-entered: "&aEntered setup mode for arena &e{arena}&a!"
+  setup-mode-exited: "&cExited setup mode!"
+  
+  # Setup Messages
+  setup-step: "&6Step {step}/8: &e{instruction}"
+  setup-complete: "&aArena setup completed successfully!"
+  position-set: "&a{position} position set!"
+
+# Error Messages
+error:
+  arena-full: "&cThis arena is full!"
+  already-in-game: "&cYou are already in a game!"
+  not-in-game: "&cYou are not in a game!"
+  game-not-active: "&cThe game is not active!"
+  invalid-arena: "&cInvalid arena!"
+  worldguard-error: "&cWorldGuard integration error!"
+
+# Command Help
+help:
+  header: "&6=== ArenaWars CTF Commands ==="
+  join: "&e/ctf join [arena] &7- Join a CTF game"
+  leave: "&e/ctf leave &7- Leave current game"
+  list: "&e/ctf list &7- List available arenas"
+  stats: "&e/ctf stats [player] &7- View player statistics"
+  help: "&e/ctf help &7- Show this help"
+  
+  admin-header: "&c=== CTF Admin Commands ==="
+  setup: "&c/ctfadmin setup <arena> &7- Setup an arena"
+  create: "&c/ctfadmin create <arena> &7- Create new arena"
+  delete: "&c/ctfadmin delete <arena> &7- Delete arena"
+  start: "&c/ctfadmin start <arena> &7- Force start game"
+  stop: "&c/ctfadmin stop <arena> &7- Force stop game"
+  reload: "&c/ctfadmin reload &7- Reload configuration"
+
+# Chat System
+chat:
+  team-prefix: "&8[&7TEAM&8] "
+  arena-prefix: "&8[&6Arena&8] "
+  lobby-prefix: "&8[&bLobby&8] "
+  team-chat-info: "&7Tip: Use &e@message &7for team chat!"
