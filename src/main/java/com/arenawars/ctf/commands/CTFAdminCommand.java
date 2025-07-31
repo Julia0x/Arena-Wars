@@ -23,9 +23,11 @@ import java.util.Map;
 public class CTFAdminCommand implements CommandExecutor, TabCompleter {
     
     private final ArenaWarsCTF plugin;
+    private final ColorManager colorManager;
     
     public CTFAdminCommand(ArenaWarsCTF plugin) {
         this.plugin = plugin;
+        this.colorManager = new ColorManager();
     }
     
     @Override
