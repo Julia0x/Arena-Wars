@@ -205,15 +205,18 @@ public class Arena {
         List<String> errors = new ArrayList<>();
         
         if (worldName == null) errors.add("World not set");
+        else if (!isWorldValid()) errors.add("World '" + worldName + "' does not exist");
         if (waitingLobby == null) errors.add("Waiting lobby not set");
         if (spectatorPoint == null) errors.add("Spectator point not set");
-        if (redSpawns.isEmpty()) errors.add("Red team spawns not set");
-        if (blueSpawns.isEmpty()) errors.add("Blue team spawns not set");
+        if (redSpawns.isEmpty()) errors.add("Red team spawns not set (minimum 2 required)");
+        else if (redSpawns.size() < 2) errors.add("Red team needs at least 2 spawns (currently: " + redSpawns.size() + ")");
+        if (blueSpawns.isEmpty()) errors.add("Blue team spawns not set (minimum 2 required)");
+        else if (blueSpawns.size() < 2) errors.add("Blue team needs at least 2 spawns (currently: " + blueSpawns.size() + ")");
         if (redFlag == null) errors.add("Red flag position not set");
         if (blueFlag == null) errors.add("Blue flag position not set");
         if (redFlagReturn == null) errors.add("Red flag return position not set");
         if (blueFlagReturn == null) errors.add("Blue flag return position not set");
-        if (corner1 == null || corner2 == null) errors.add("Arena bounds not set");
+        if (corner1 == null || corner2 == null) errors.add("Arena bounds not set (both corners required)");
         
         return errors;
     }
