@@ -8,7 +8,6 @@ package com.arenawars.ctf.managers;
 import com.arenawars.ctf.ArenaWarsCTF;
 import com.arenawars.ctf.game.Team;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,11 +20,11 @@ import java.util.Set;
 public class ChatManager implements Listener {
     
     private final ArenaWarsCTF plugin;
-    private final LegacyComponentSerializer serializer;
+    private final ColorManager colorManager;
     
     public ChatManager(ArenaWarsCTF plugin) {
         this.plugin = plugin;
-        this.serializer = LegacyComponentSerializer.legacyAmpersand();
+        this.colorManager = new ColorManager();
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -65,7 +64,8 @@ public class ChatManager implements Listener {
         
         for (Player recipient : recipients) {
             if (recipient.isOnline()) {
-                recipient.sendMessage(serializer.deserialize(formattedMessage));
+                Component messageComponent = colorManager.colorizeForChat(formattedMessage);
+                recipient.sendMessage(messageComponent);
             }
         }
         
@@ -79,7 +79,8 @@ public class ChatManager implements Listener {
         // Send only to team members
         for (Player teammate : plugin.getPlayerManager().getPlayersInTeam(team, arenaName)) {
             if (teammate.isOnline()) {
-                teammate.sendMessage(serializer.deserialize(formattedMessage));
+                Component messageComponent = colorManager.colorizeForChat(formattedMessage);
+                teammate.sendMessage(messageComponent);
             }
         }
         
@@ -93,7 +94,8 @@ public class ChatManager implements Listener {
         // Send to all lobby players (not in any arena)
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (!plugin.getPlayerManager().isInArena(player)) {
-                player.sendMessage(serializer.deserialize(formattedMessage));
+                Component messageComponent = colorManager.colorizeForChat(formattedMessage);
+                player.sendMessage(messageComponent);
             }
         }
         
@@ -105,7 +107,7 @@ public class ChatManager implements Listener {
         // Get player level and title
         PlayerManager.PlayerData data = plugin.getPlayerManager().getPlayerData(sender);
         int level = plugin.getXPManager().calculateLevel(data.experience);
-        String levelColor = plugin.getXPManager().getLevelColor(level);
+        String levelColor = colorManager.getLevelColor(level);
         
         String teamPrefix = "";
         if (team != null) {
@@ -119,7 +121,7 @@ public class ChatManager implements Listener {
         // Get player level
         PlayerManager.PlayerData data = plugin.getPlayerManager().getPlayerData(sender);
         int level = plugin.getXPManager().calculateLevel(data.experience);
-        String levelColor = plugin.getXPManager().getLevelColor(level);
+        String levelColor = colorManager.getLevelColor(level);
         
         return "&8[" + team.getColoredName() + " TEAM&8] " + levelColor + "[" + level + "] &f" + sender.getName() + "&8: &f" + message;
     }
@@ -128,7 +130,7 @@ public class ChatManager implements Listener {
         // Get player level and title
         PlayerManager.PlayerData data = plugin.getPlayerManager().getPlayerData(sender);
         int level = plugin.getXPManager().calculateLevel(data.experience);
-        String levelColor = plugin.getXPManager().getLevelColor(level);
+        String levelColor = colorManager.getLevelColor(level);
         String levelTitle = plugin.getXPManager().getLevelTitle(level);
         
         return "&8[&bLobby&8] " + levelColor + "[" + level + " " + levelTitle + "] &f" + sender.getName() + "&8: &7" + message;
@@ -136,7 +138,7 @@ public class ChatManager implements Listener {
     
     // Public method for system messages to specific arenas
     public void sendArenaMessage(String arenaName, String message) {
-        Component messageComponent = serializer.deserialize(message);
+        Component messageComponent = colorManager.colorizeForChat(message);
         
         for (Player player : plugin.getPlayerManager().getPlayersInArena(arenaName)) {
             if (player.isOnline()) {
@@ -147,7 +149,7 @@ public class ChatManager implements Listener {
     
     // Public method for system messages to lobby
     public void sendLobbyMessage(String message) {
-        Component messageComponent = serializer.deserialize(message);
+        Component messageComponent = colorManager.colorizeForChat(message);
         
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (!plugin.getPlayerManager().isInArena(player)) {
@@ -158,7 +160,7 @@ public class ChatManager implements Listener {
     
     // Public method for team messages
     public void sendTeamMessage(String arenaName, Team team, String message) {
-        Component messageComponent = serializer.deserialize(message);
+        Component messageComponent = colorManager.colorizeForChat(message);
         
         for (Player player : plugin.getPlayerManager().getPlayersInTeam(team, arenaName)) {
             if (player.isOnline()) {
