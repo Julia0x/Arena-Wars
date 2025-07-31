@@ -6,9 +6,8 @@
 package com.arenawars.ctf.utils;
 
 import com.arenawars.ctf.ArenaWarsCTF;
+import com.arenawars.ctf.managers.ColorManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -20,11 +19,15 @@ import java.util.Map;
 public class MessageUtil {
     
     private final ArenaWarsCTF plugin;
-    private final LegacyComponentSerializer serializer;
+    private final ColorManager colorManager;
     
     public MessageUtil(ArenaWarsCTF plugin) {
         this.plugin = plugin;
-        this.serializer = LegacyComponentSerializer.legacyAmpersand();
+        this.colorManager = new ColorManager();
+    }
+    
+    public ColorManager getColorManager() {
+        return colorManager;
     }
     
     public String getMessage(String path) {
@@ -43,18 +46,18 @@ public class MessageUtil {
     
     public void sendMessage(Player player, String path) {
         String message = getPrefix() + getMessage(path);
-        Component component = serializer.deserialize(message);
+        Component component = colorManager.colorizeForChat(message);
         player.sendMessage(component);
     }
     
     public void sendMessage(Player player, String path, Map<String, String> placeholders) {
         String message = getPrefix() + getMessage(path, placeholders);
-        Component component = serializer.deserialize(message);
+        Component component = colorManager.colorizeForChat(message);
         player.sendMessage(component);
     }
     
     public void sendRawMessage(Player player, String message) {
-        Component component = serializer.deserialize(message);
+        Component component = colorManager.colorizeForChat(message);
         player.sendMessage(component);
     }
     
@@ -68,8 +71,8 @@ public class MessageUtil {
         String titleText = getMessage(titlePath, placeholders);
         String subtitleText = getMessage(subtitlePath, placeholders);
         
-        Component title = serializer.deserialize(titleText);
-        Component subtitle = serializer.deserialize(subtitleText);
+        Component title = colorManager.colorizeForTitle(titleText);
+        Component subtitle = colorManager.colorizeForTitle(subtitleText);
         
         Title titleObj = Title.title(
             title,
@@ -84,8 +87,28 @@ public class MessageUtil {
         player.showTitle(titleObj);
     }
     
+    // Overloaded method for direct title sending (used by XPManager)
+    public void sendTitle(Player player, String title, String subtitle) {
+        if (!plugin.getConfigManager().areTitlesEnabled()) return;
+        
+        Component titleComponent = colorManager.colorizeForTitle(title);
+        Component subtitleComponent = colorManager.colorizeForTitle(subtitle);
+        
+        Title titleObj = Title.title(
+            titleComponent,
+            subtitleComponent,
+            Title.Times.times(
+                Duration.ofMillis(500),
+                Duration.ofSeconds(3),
+                Duration.ofMillis(500)
+            )
+        );
+        
+        player.showTitle(titleObj);
+    }
+    
     public void sendActionBar(Player player, String message) {
-        Component component = serializer.deserialize(message);
+        Component component = colorManager.colorizeForActionBar(message);
         player.sendActionBar(component);
     }
     
@@ -97,19 +120,26 @@ public class MessageUtil {
     
     public void broadcast(String path) {
         String message = getPrefix() + getMessage(path);
-        Component component = serializer.deserialize(message);
+        Component component = colorManager.colorizeForChat(message);
         plugin.getServer().broadcast(component);
     }
     
     public void broadcast(String path, Map<String, String> placeholders) {
         String message = getPrefix() + getMessage(path, placeholders);
-        Component component = serializer.deserialize(message);
+        Component component = colorManager.colorizeForChat(message);
         plugin.getServer().broadcast(component);
     }
     
     public void broadcastToArena(String arenaName, String path) {
-        // Implementation would depend on arena player tracking
-        // This is a placeholder for arena-specific broadcasting
+        String message = getPrefix() + getMessage(path);
+        Component component = colorManager.colorizeForChat(message);
+        
+        // Send to all players in arena
+        for (Player player : plugin.getPlayerManager().getPlayersInArena(arenaName)) {
+            if (player.isOnline()) {
+                player.sendMessage(component);
+            }
+        }
     }
     
     public String getPrefix() {
@@ -117,7 +147,28 @@ public class MessageUtil {
     }
     
     public Component colorize(String text) {
-        return serializer.deserialize(text);
+        return colorManager.colorize(text);
+    }
+    
+    // Helper methods for different message types
+    public void sendSuccessMessage(Player player, String message) {
+        Component component = colorManager.createSuccessMessage(message);
+        player.sendMessage(component);
+    }
+    
+    public void sendErrorMessage(Player player, String message) {
+        Component component = colorManager.createErrorMessage(message);
+        player.sendMessage(component);
+    }
+    
+    public void sendWarningMessage(Player player, String message) {
+        Component component = colorManager.createWarningMessage(message);
+        player.sendMessage(component);
+    }
+    
+    public void sendInfoMessage(Player player, String message) {
+        Component component = colorManager.createInfoMessage(message);
+        player.sendMessage(component);
     }
     
     // Utility method to create placeholder maps easily
@@ -131,5 +182,10 @@ public class MessageUtil {
         }
         
         return placeholders;
+    }
+    
+    // Method for formatting messages with the new ColorManager
+    public Component formatMessage(String message, Object... placeholders) {
+        return colorManager.formatMessage(message, placeholders);
     }
 }
