@@ -10,9 +10,6 @@ import com.arenawars.ctf.game.CTFGame;
 import com.arenawars.ctf.game.Team;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
@@ -25,13 +22,13 @@ public class ScoreboardManager {
     private final ArenaWarsCTF plugin;
     private final Map<Player, Scoreboard> playerScoreboards;
     private final Map<Player, BossBar> playerBossBars;
-    private final LegacyComponentSerializer serializer;
+    private final ColorManager colorManager;
     
     public ScoreboardManager(ArenaWarsCTF plugin) {
         this.plugin = plugin;
         this.playerScoreboards = new HashMap<>();
         this.playerBossBars = new HashMap<>();
-        this.serializer = LegacyComponentSerializer.legacyAmpersand();
+        this.colorManager = new ColorManager();
     }
     
     public void createGameScoreboard(Player player, CTFGame game) {
@@ -45,7 +42,7 @@ public class ScoreboardManager {
         Objective objective = scoreboard.registerNewObjective(
             "ctf_game", 
             "dummy", 
-            serializer.deserialize("&6&lArenaWars CTF")
+            colorManager.colorize("&6&lArenaWars CTF")
         );
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         
@@ -86,21 +83,25 @@ public class ScoreboardManager {
             objective.getScore(" ").setScore(line--);
             
             // Arena name
-            objective.getScore("&7Arena: &e" + game.getArena().getDisplayName()).setScore(line--);
+            String arenaLine = colorManager.colorizeForScoreboard("&7Arena: &e" + game.getArena().getDisplayName());
+            objective.getScore(arenaLine).setScore(line--);
             
             // Empty line
             objective.getScore("  ").setScore(line--);
             
             // Team scores
-            objective.getScore("&c&lRed Team: &f" + scores.get(Team.RED)).setScore(line--);
-            objective.getScore("&9&lBlue Team: &f" + scores.get(Team.BLUE)).setScore(line--);
+            String redScoreLine = colorManager.colorizeForScoreboard("&c&lRed Team: &f" + scores.get(Team.RED));
+            String blueScoreLine = colorManager.colorizeForScoreboard("&9&lBlue Team: &f" + scores.get(Team.BLUE));
+            objective.getScore(redScoreLine).setScore(line--);
+            objective.getScore(blueScoreLine).setScore(line--);
             
             // Empty line
             objective.getScore("   ").setScore(line--);
             
             // Your team
             if (playerTeam != null) {
-                objective.getScore("&7Your Team: " + playerTeam.getColoredName()).setScore(line--);
+                String teamLine = colorManager.colorizeForScoreboard("&7Your Team: " + playerTeam.getColoredName());
+                objective.getScore(teamLine).setScore(line--);
             }
             
             // Empty line
@@ -109,28 +110,36 @@ public class ScoreboardManager {
             // Game time
             int minutes = game.getGameTime() / 60;
             int seconds = game.getGameTime() % 60;
-            objective.getScore("&7Time: &e" + String.format("%02d:%02d", minutes, seconds)).setScore(line--);
+            String timeLine = colorManager.colorizeForScoreboard("&7Time: &e" + String.format("%02d:%02d", minutes, seconds));
+            objective.getScore(timeLine).setScore(line--);
             
             // Empty line
             objective.getScore("     ").setScore(line--);
             
             // Player stats
             PlayerManager.PlayerData data = plugin.getPlayerManager().getPlayerData(player);
-            objective.getScore("&7Kills: &a" + data.kills).setScore(line--);
-            objective.getScore("&7Deaths: &c" + data.deaths).setScore(line--);
-            objective.getScore("&7Captures: &6" + data.captures).setScore(line--);
+            String killsLine = colorManager.colorizeForScoreboard("&7Kills: &a" + data.kills);
+            String deathsLine = colorManager.colorizeForScoreboard("&7Deaths: &c" + data.deaths);
+            String capturesLine = colorManager.colorizeForScoreboard("&7Captures: &6" + data.captures);
+            
+            objective.getScore(killsLine).setScore(line--);
+            objective.getScore(deathsLine).setScore(line--);
+            objective.getScore(capturesLine).setScore(line--);
             
             // Empty line
             objective.getScore("      ").setScore(line--);
             
             // Website/branding
-            objective.getScore("&ewww.arenawars.com").setScore(line--);
+            String brandingLine = colorManager.colorizeForScoreboard("&ewww.arenawars.com");
+            objective.getScore(brandingLine).setScore(line--);
         }
     }
     
     private void createGameBossBar(Player player, CTFGame game) {
+        Component title = colorManager.colorizeForBossBar("&6ArenaWars CTF - Preparing...");
+        
         BossBar bossBar = BossBar.bossBar(
-            serializer.deserialize("&6ArenaWars CTF - Preparing..."),
+            title,
             1.0f,
             BossBar.Color.YELLOW,
             BossBar.Overlay.PROGRESS
@@ -160,12 +169,13 @@ public class ScoreboardManager {
             // Update boss bar content based on game state
             if (!game.isGameStarted()) {
                 // Waiting/starting
-                bossBar.name(serializer.deserialize("&eWaiting for players... (" + game.getPlayers().size() + "/" + plugin.getConfigManager().getMaxPlayersPerArena() + ")"));
+                String waitingText = "&eWaiting for players... (" + game.getPlayers().size() + "/" + plugin.getConfigManager().getMaxPlayersPerArena() + ")";
+                bossBar.name(colorManager.colorizeForBossBar(waitingText));
                 bossBar.progress(1.0f);
                 bossBar.color(BossBar.Color.YELLOW);
             } else if (game.isGameEnded()) {
                 // Game ended
-                bossBar.name(serializer.deserialize("&6Game Ended!"));
+                bossBar.name(colorManager.colorizeForBossBar("&6Game Ended!"));
                 bossBar.progress(0.0f);
                 bossBar.color(BossBar.Color.WHITE);
             } else {
@@ -174,7 +184,7 @@ public class ScoreboardManager {
                     redScore, blueScore,
                     game.getGameTime() / 60, game.getGameTime() % 60);
                 
-                bossBar.name(serializer.deserialize(bossBarText));
+                bossBar.name(colorManager.colorizeForBossBar(bossBarText));
                 
                 // Progress based on highest team score
                 int maxScore = Math.max(redScore, blueScore);
