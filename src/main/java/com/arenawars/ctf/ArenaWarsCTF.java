@@ -146,6 +146,10 @@ public final class ArenaWarsCTF extends JavaPlugin {
         return configManager;
     }
     
+    public ColorManager getColorManager() {
+        return colorManager;
+    }
+    
     public ArenaManager getArenaManager() {
         return arenaManager;
     }
