@@ -184,6 +184,7 @@ public class Arena {
     // Validation
     public boolean isValid() {
         return worldName != null && 
+               isWorldValid() &&
                waitingLobby != null &&
                spectatorPoint != null &&
                !redSpawns.isEmpty() &&
@@ -194,6 +195,10 @@ public class Arena {
                blueFlagReturn != null &&
                corner1 != null &&
                corner2 != null;
+    }
+    
+    public boolean isWorldValid() {
+        return worldName != null && org.bukkit.Bukkit.getWorld(worldName) != null;
     }
     
     public List<String> getValidationErrors() {
