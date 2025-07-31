@@ -6,12 +6,20 @@
 package com.arenawars.ctf.arena;
 
 import com.arenawars.ctf.ArenaWarsCTF;
+import com.arenawars.ctf.managers.ColorManager;
 import com.arenawars.ctf.utils.MessageUtil;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldedit.math.BlockVector3;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,10 +29,12 @@ public class ArenaSetup {
     
     private final ArenaWarsCTF plugin;
     private final Map<Player, SetupSession> setupSessions;
+    private final ColorManager colorManager;
     
     public ArenaSetup(ArenaWarsCTF plugin) {
         this.plugin = plugin;
         this.setupSessions = new HashMap<>();
+        this.colorManager = new ColorManager();
     }
     
     public void startSetup(Player player, String arenaName) {
@@ -148,14 +158,17 @@ public class ArenaSetup {
         );
         
         plugin.getMessageUtil().sendMessage(player, "arena.setup-step", placeholders);
+        
+        // Update setup tools based on current step
+        updateSetupTools(player, step);
     }
     
     private String getStepInstruction(SetupStep step) {
         switch (step) {
             case WAITING_LOBBY: return "Right-click to set waiting lobby position";
             case SPECTATOR_POINT: return "Right-click to set spectator point";
-            case RED_SPAWNS: return "Right-click to add red team spawns (minimum 2)";
-            case BLUE_SPAWNS: return "Right-click to add blue team spawns (minimum 2)";
+            case RED_SPAWNS: return "Right-click to add red team spawns (minimum 2, use red wool tool)";
+            case BLUE_SPAWNS: return "Right-click to add blue team spawns (minimum 2, use blue wool tool)";
             case RED_FLAG: return "Right-click to set red flag position";
             case BLUE_FLAG: return "Right-click to set blue flag position";
             case RED_FLAG_RETURN: return "Right-click to set red flag return position";
@@ -172,38 +185,28 @@ public class ArenaSetup {
         
         // Position tool
         ItemStack positionTool = new ItemStack(Material.GOLDEN_SWORD);
-        ItemMeta meta = positionTool.getItemMeta();
-        meta.setDisplayName("§6Position Tool");
-        meta.setLore(Arrays.asList("§7Right-click to set positions"));
-        positionTool.setItemMeta(meta);
+        colorManager.colorizeItem(positionTool, "&6Position Tool", 
+            Arrays.asList("&7Right-click to set positions"));
         
         // Red spawn tool
         ItemStack redSpawnTool = new ItemStack(Material.RED_WOOL);
-        ItemMeta redMeta = redSpawnTool.getItemMeta();
-        redMeta.setDisplayName("§cRed Spawn Tool");
-        redMeta.setLore(Arrays.asList("§7Right-click to add red spawns"));
-        redSpawnTool.setItemMeta(redMeta);
+        colorManager.colorizeItem(redSpawnTool, "&cRed Spawn Tool", 
+            Arrays.asList("&7Right-click to add red spawns"));
         
         // Blue spawn tool
         ItemStack blueSpawnTool = new ItemStack(Material.BLUE_WOOL);
-        ItemMeta blueMeta = blueSpawnTool.getItemMeta();
-        blueMeta.setDisplayName("§9Blue Spawn Tool");
-        blueMeta.setLore(Arrays.asList("§7Right-click to add blue spawns"));
-        blueSpawnTool.setItemMeta(blueMeta);
+        colorManager.colorizeItem(blueSpawnTool, "&9Blue Spawn Tool", 
+            Arrays.asList("&7Right-click to add blue spawns"));
         
         // Next step tool
         ItemStack nextTool = new ItemStack(Material.ARROW);
-        ItemMeta nextMeta = nextTool.getItemMeta();
-        nextMeta.setDisplayName("§aNext Step");
-        nextMeta.setLore(Arrays.asList("§7Right-click to go to next step"));
-        nextTool.setItemMeta(nextMeta);
+        colorManager.colorizeItem(nextTool, "&aNext Step", 
+            Arrays.asList("&7Right-click to go to next step"));
         
         // Exit tool
         ItemStack exitTool = new ItemStack(Material.BARRIER);
-        ItemMeta exitMeta = exitTool.getItemMeta();
-        exitMeta.setDisplayName("§cExit Setup");
-        exitMeta.setLore(Arrays.asList("§7Right-click to exit setup mode"));
-        exitTool.setItemMeta(exitMeta);
+        colorManager.colorizeItem(exitTool, "&cExit Setup", 
+            Arrays.asList("&7Right-click to exit setup mode"));
         
         player.getInventory().setItem(0, positionTool);
         player.getInventory().setItem(1, redSpawnTool);
@@ -212,30 +215,125 @@ public class ArenaSetup {
         player.getInventory().setItem(8, exitTool);
     }
     
+    private void updateSetupTools(Player player, SetupStep step) {
+        // Highlight the current tool based on the step
+        ItemStack highlightedTool = null;
+        
+        switch (step) {
+            case RED_SPAWNS:
+                highlightedTool = new ItemStack(Material.RED_WOOL);
+                colorManager.colorizeItem(highlightedTool, "&c&l>> Red Spawn Tool <<", 
+                    Arrays.asList("&7Right-click to add red spawns", "&e&lCURRENT STEP"));
+                player.getInventory().setItem(1, highlightedTool);
+                break;
+            case BLUE_SPAWNS:
+                highlightedTool = new ItemStack(Material.BLUE_WOOL);
+                colorManager.colorizeItem(highlightedTool, "&9&l>> Blue Spawn Tool <<", 
+                    Arrays.asList("&7Right-click to add blue spawns", "&e&lCURRENT STEP"));
+                player.getInventory().setItem(2, highlightedTool);
+                break;
+            default:
+                highlightedTool = new ItemStack(Material.GOLDEN_SWORD);
+                colorManager.colorizeItem(highlightedTool, "&6&l>> Position Tool <<", 
+                    Arrays.asList("&7Right-click to set positions", "&e&lCURRENT STEP"));
+                player.getInventory().setItem(0, highlightedTool);
+                break;
+        }
+    }
+    
     private void completeSetup(Player player, SetupSession session) {
         Arena arena = session.getArena();
         
+        // Validate world exists
+        World world = player.getWorld();
+        if (world == null) {
+            plugin.getMessageUtil().sendErrorMessage(player, "World not found! Please ensure you're in a valid world.");
+            return;
+        }
+        
         if (!arena.isValid()) {
             // Show validation errors
+            plugin.getMessageUtil().sendErrorMessage(player, "Arena setup is incomplete:");
             for (String error : arena.getValidationErrors()) {
-                plugin.getMessageUtil().sendRawMessage(player, "§c" + error);
+                plugin.getMessageUtil().sendRawMessage(player, "&c- " + error);
             }
             return;
         }
         
         // Set world and region name
-        arena.setWorldName(player.getWorld().getName());
-        arena.setRegionName(arena.getName() + "_region");
+        arena.setWorldName(world.getName());
+        arena.setRegionName(arena.getName().toLowerCase() + "_region");
         arena.setEnabled(true);
+        
+        // Create WorldGuard region
+        if (createWorldGuardRegion(arena, world)) {
+            plugin.getMessageUtil().sendSuccessMessage(player, "WorldGuard region created successfully!");
+        } else {
+            plugin.getMessageUtil().sendWarningMessage(player, "WorldGuard region creation failed, but arena was saved.");
+        }
         
         // Save arena
         plugin.getArenaManager().saveArena(arena);
         
-        // End setup
-        endSetup(player);
-        
+        // Send completion messages
         Map<String, String> placeholders = MessageUtil.createPlaceholders("arena", arena.getName());
         plugin.getMessageUtil().sendMessage(player, "arena.setup-complete", placeholders);
+        
+        plugin.getMessageUtil().sendSuccessMessage(player, "Arena '" + arena.getName() + "' has been created and enabled!");
+        plugin.getMessageUtil().sendInfoMessage(player, "Players can now join this arena using /ctf join " + arena.getName());
+        
+        // Auto-exit setup mode
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            endSetup(player);
+        }, 60L); // Wait 3 seconds before auto-exit
+    }
+    
+    private boolean createWorldGuardRegion(Arena arena, World world) {
+        try {
+            if (arena.getCorner1() == null || arena.getCorner2() == null) {
+                return false;
+            }
+            
+            // Get WorldGuard region manager
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionManager regionManager = container.get(BukkitAdapter.adapt(world));
+            
+            if (regionManager == null) {
+                return false;
+            }
+            
+            // Create region boundaries
+            Location corner1 = arena.getCorner1();
+            Location corner2 = arena.getCorner2();
+            
+            BlockVector3 min = BlockVector3.at(
+                Math.min(corner1.getBlockX(), corner2.getBlockX()),
+                Math.min(corner1.getBlockY(), corner2.getBlockY()),
+                Math.min(corner1.getBlockZ(), corner2.getBlockZ())
+            );
+            
+            BlockVector3 max = BlockVector3.at(
+                Math.max(corner1.getBlockX(), corner2.getBlockX()),
+                Math.max(corner1.getBlockY(), corner2.getBlockY()),
+                Math.max(corner1.getBlockZ(), corner2.getBlockZ())
+            );
+            
+            // Create the region
+            ProtectedCuboidRegion region = new ProtectedCuboidRegion(arena.getRegionName(), min, max);
+            
+            // Set region flags (optional - customize as needed)
+            // region.setFlag(Flags.BUILD, StateFlag.State.DENY);
+            // region.setFlag(Flags.PVP, StateFlag.State.ALLOW);
+            
+            // Add region to manager
+            regionManager.addRegion(region);
+            
+            return true;
+            
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to create WorldGuard region for arena " + arena.getName() + ": " + e.getMessage());
+            return false;
+        }
     }
     
     public static class SetupSession {
