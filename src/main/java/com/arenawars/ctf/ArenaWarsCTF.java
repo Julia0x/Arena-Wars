@@ -29,6 +29,7 @@ public final class ArenaWarsCTF extends JavaPlugin {
     
     // Managers
     private ConfigManager configManager;
+    private ColorManager colorManager;
     private ArenaManager arenaManager;
     private GameManager gameManager;
     private PlayerManager playerManager;
