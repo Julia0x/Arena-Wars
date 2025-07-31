@@ -96,6 +96,7 @@ public final class ArenaWarsCTF extends JavaPlugin {
     
     private void initializeManagers() {
         configManager = new ConfigManager(this);
+        colorManager = new ColorManager();
         messageUtil = new MessageUtil(this);
         arenaManager = new ArenaManager(this);
         playerManager = new PlayerManager(this);
