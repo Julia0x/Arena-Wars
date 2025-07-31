@@ -10,12 +10,12 @@ import com.arenawars.ctf.utils.MessageUtil;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class XPManager {
     
     private final ArenaWarsCTF plugin;
+    private final ColorManager colorManager;
     
     // XP Values
     public static final int XP_KILL = 10;
@@ -31,6 +31,7 @@ public class XPManager {
     
     public XPManager(ArenaWarsCTF plugin) {
         this.plugin = plugin;
+        this.colorManager = new ColorManager();
     }
     
     public void awardKillXP(Player player) {
@@ -93,14 +94,19 @@ public class XPManager {
             // Award level up rewards
             int coinsReward = level * 10; // 10 coins per level
             
-            Map<String, String> placeholders = MessageUtil.createPlaceholders(
-                "level", String.valueOf(level),
-                "coins", String.valueOf(coinsReward)
-            );
+            // Use ColorManager for proper color processing
+            String levelUpTitle = "&6&lLEVEL UP!";
+            String levelUpSubtitle = "&eLevel " + level + " reached!";
             
-            plugin.getMessageUtil().sendTitle(player, "&6&lLEVEL UP!", "&eLevel " + level + " reached!");
-            plugin.getMessageUtil().sendMessage(player, "&a&l[LEVEL UP] &eYou reached level &6" + level + "&e!");
-            plugin.getMessageUtil().sendMessage(player, "&eReward: &6" + coinsReward + " coins");
+            plugin.getMessageUtil().sendTitle(player, levelUpTitle, levelUpSubtitle);
+            
+            String levelUpMessage = colorManager.createSuccessMessage(
+                "LEVEL UP! You reached level " + colorManager.getLevelColor(level) + level + "&a!"
+            ).toString();
+            plugin.getMessageUtil().sendRawMessage(player, levelUpMessage);
+            
+            String rewardMessage = "&eReward: &6" + coinsReward + " coins";
+            plugin.getMessageUtil().sendRawMessage(player, rewardMessage);
             
             // Play level up sound
             plugin.getMessageUtil().playSound(player, Sound.ENTITY_PLAYER_LEVELUP);
@@ -172,12 +178,6 @@ public class XPManager {
     }
     
     public String getLevelColor(int level) {
-        if (level >= 100) return "&d"; // Light Purple
-        if (level >= 75) return "&5";  // Purple
-        if (level >= 50) return "&c";  // Red
-        if (level >= 25) return "&6";  // Gold
-        if (level >= 10) return "&e";  // Yellow
-        if (level >= 5) return "&a";   // Green
-        return "&7";                   // Gray
+        return colorManager.getLevelColor(level);
     }
 }
